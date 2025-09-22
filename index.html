@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Cursor Tracker Overlay</title>
+  <style>
+    html, body {
+      background: transparent;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+    #container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #00ff00;
+      font-size: 1.5em;
+      font-family: monospace;
+      user-select: none;
+      -webkit-app-region: drag;
+    }
+    #controls {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      pointer-events: auto;
+      -webkit-app-region: no-drag;
+    }
+    button {
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin-left: 4px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+    }
+    body.show-box {
+      background: rgba(0,0,0,0.1);
+      border: 2px solid #00ff00;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="coords">X: 0, Y: 0</div>
+    <div id="controls">
+      <button id="toggleBox">□</button>
+      <button id="close">×</button>
+    </div>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>

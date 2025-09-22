@@ -1,0 +1,18 @@
+{
+  "name": "minecraft-cursor-tracking-head",
+  "version": "1.0.0",
+  "description": "Electron overlay app that tracks and displays global cursor coordinates transparently.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^38.1.2",
+    "electron-rebuild": "^3.2.9"
+  },
+  "dependencies": {
+    "robotjs": "^0.6.0"
+  }
+}
