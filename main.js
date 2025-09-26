@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-
+const remoteMain = require('@electron/remote/main');
+remoteMain.initialize();
 let mainWindow;
 
 function createWindow() {
@@ -21,6 +22,7 @@ function createWindow() {
     },
   });
 
+remoteMain.enable(mainWindow.webContents);
   mainWindow.loadFile('index.html');
   mainWindow.setAlwaysOnTop(true, 'screen-saver');
   mainWindow.setVisibleOnAllWorkspaces(true);
