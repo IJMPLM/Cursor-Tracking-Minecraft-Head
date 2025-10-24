@@ -91,7 +91,7 @@ ipcRenderer.on('mouse-pos', (event, pos) => {
   updateHeadTracking(pos.x, pos.y, centerX, centerY);
 });
 
-// Blinking animation - squish eyes vertically
+// Blinking animation - shrink eyes downward like an eyelid closing
 function startBlinking() {
   const blinkConfig = config.animations.blink;
   const intervalTime = blinkConfig.intervalMin + Math.random() * (blinkConfig.intervalMax - blinkConfig.intervalMin);
@@ -105,8 +105,10 @@ function startBlinking() {
       const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
       const translateValue = translateMatch ? translateMatch[0] : 'translate(0px, 0px)';
       
-      // Squish eyes to create blink effect while preserving translation
-      eyesLayer.style.transform = `${translateValue} scaleY(0.1)`;
+      // Shrink eyes vertically to simulate eyelid closing
+      const scaleY = blinkConfig.scaleY;
+      const translateY = blinkConfig.translateY;
+      eyesLayer.style.transform = `${translateValue} scaleY(${scaleY}) translateY(${translateY}%)`;
       
       // Return to normal after blink duration
       setTimeout(() => {
@@ -120,7 +122,7 @@ function startBlinking() {
   }, intervalTime);
 }
 
-// Mouth animation - expand mouth to simulate talking
+// Mouth animation - shrink width while expanding height to create circular opening from line
 function startMouthAnimation() {
   const mouthConfig = config.animations.mouth;
   const intervalTime = mouthConfig.intervalMin + Math.random() * (mouthConfig.intervalMax - mouthConfig.intervalMin);
@@ -134,8 +136,11 @@ function startMouthAnimation() {
       const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
       const translateValue = translateMatch ? translateMatch[0] : 'translate(0px, 0px)';
       
-      // Expand mouth to create opening effect while preserving translation
-      mouthLayer.style.transform = `${translateValue} scaleY(2.5) scaleX(1.1)`;
+      // Shrink width while expanding height - creates circular mouth from horizontal line
+      const scaleY = mouthConfig.scaleY;
+      const scaleX = mouthConfig.scaleX;
+      const translateY = mouthConfig.translateY;
+      mouthLayer.style.transform = `${translateValue} scaleY(${scaleY}) scaleX(${scaleX}) translateY(${translateY}%)`;
       
       // Return to normal after mouth open duration
       const duration = mouthConfig.durationMin + Math.random() * (mouthConfig.durationMax - mouthConfig.durationMin);
