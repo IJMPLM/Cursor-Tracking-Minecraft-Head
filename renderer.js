@@ -1,5 +1,11 @@
 const { ipcRenderer } = require('electron');
 const remote = window.require('@electron/remote');
+const fs = require('fs');
+const path = require('path');
+
+// Load configuration
+const configPath = path.join(__dirname, 'config.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 // Element references
 const closeBtn = document.getElementById('close');
@@ -8,6 +14,11 @@ const headLayers = document.getElementById('headLayers');
 const eyesLayer = document.getElementById('eyesLayer');
 const mouthLayer = document.getElementById('mouthLayer');
 const faceLayer = document.getElementById('faceLayer');
+
+// Set assets from config
+eyesLayer.src = config.assets.eyes;
+mouthLayer.src = config.assets.mouth;
+faceLayer.src = config.assets.face;
 
 // Animation intervals
 let blinkInterval;
@@ -21,51 +32,50 @@ document.addEventListener('DOMContentLoaded', () => {
   startMouthAnimation();
 });
 
-// 3D Head tracking function
+// 3D Head tracking function with proper rotation AND translation
 function updateHeadTracking(cursorX, cursorY, centerX, centerY) {
   const vecX = cursorX - centerX;
   const vecY = cursorY - centerY;
   
   // Calculate distance from window center to cursor
   const distance = Math.sqrt(vecX * vecX + vecY * vecY);
-  const maxDistance = 400; // Distance at which rotation reaches maximum
   
-  // Calculate dampening - decreases as cursor gets farther
-  // At close range (0-200px): full rotation
-  // At far range (400px+): minimal rotation
+  // Get config values
+  const maxDistance = config.tracking.rotationDistance;
+  const maxHeadTilt = config.tracking.maxHeadRotation;
+  const maxTranslation = config.tracking.maxEyeTranslation;
+  const translationDistance = config.tracking.translationDistance;
+  
+  // Calculate rotation dampening - decreases as cursor gets farther
   const rotationDampening = Math.max(0.1, 1 - (distance / maxDistance));
   
-  // Head rotation - subtle, limited by distance
-  const maxHeadTilt = 15; // Maximum head rotation in degrees (reduced)
+  // Calculate 3D rotation angles for the ENTIRE head (all layers rotate together)
   const headRotateY = (vecX / maxDistance) * maxHeadTilt * rotationDampening;
   const headRotateX = -(vecY / maxDistance) * maxHeadTilt * rotationDampening;
   
-  // Apply 3D transformation to the entire head (subtle rotation)
+  // Apply 3D rotation to the entire head container
   if (headLayers) {
     headLayers.style.transform = `rotateX(${headRotateX}deg) rotateY(${headRotateY}deg)`;
   }
   
-  // Eyes and mouth translation - independent movement for "looking" effect
-  const maxTranslation = 8; // Maximum pixel movement for eyes/mouth
-  const translationDampening = Math.min(1, distance / 300); // Increases with distance up to 300px
-  
-  // Calculate translation based on cursor direction
+  // Calculate translation for eyes/mouth (happens WITHIN the 3D rotated space)
+  const translationDampening = Math.min(1, distance / translationDistance);
   const eyeTranslateX = (vecX / maxDistance) * maxTranslation * translationDampening;
   const eyeTranslateY = (vecY / maxDistance) * maxTranslation * translationDampening;
   
-  // Apply translation to eyes (independent from head rotation)
+  // Apply translation to eyes (moves within the rotated 3D head)
   if (eyesLayer && !isBlinking) {
     eyesLayer.style.transform = `translate(${eyeTranslateX}px, ${eyeTranslateY}px)`;
   }
   
-  // Apply translation to mouth (independent from head rotation)
+  // Apply translation to mouth (moves within the rotated 3D head, slightly less than eyes)
   if (mouthLayer && !isMouthOpen) {
     mouthLayer.style.transform = `translate(${eyeTranslateX * 0.7}px, ${eyeTranslateY * 0.7}px)`;
   }
   
-  // Apply same translation to face to keep it aligned
+  // Face stays fixed in the 3D space - no additional translation, only rotates with parent
   if (faceLayer) {
-    faceLayer.style.transform = `translate(${eyeTranslateX * 0.7}px, ${eyeTranslateY * 0.7}px)`;
+    faceLayer.style.transform = 'none';
   }
 }
 
@@ -83,7 +93,10 @@ ipcRenderer.on('mouse-pos', (event, pos) => {
 
 // Blinking animation - squish eyes vertically
 function startBlinking() {
-  blinkInterval = setInterval(() => {
+  const blinkConfig = config.animations.blink;
+  const intervalTime = blinkConfig.intervalMin + Math.random() * (blinkConfig.intervalMax - blinkConfig.intervalMin);
+  
+  blinkInterval = setTimeout(() => {
     if (!isBlinking && eyesLayer) {
       isBlinking = true;
       
@@ -99,14 +112,20 @@ function startBlinking() {
       setTimeout(() => {
         eyesLayer.style.transform = translateValue;
         isBlinking = false;
-      }, 150); // Blink duration
+        startBlinking(); // Schedule next blink
+      }, blinkConfig.duration);
+    } else {
+      startBlinking(); // Try again if conditions not met
     }
-  }, 3000 + Math.random() * 2000); // Random blink every 3-5 seconds
+  }, intervalTime);
 }
 
 // Mouth animation - expand mouth to simulate talking
 function startMouthAnimation() {
-  mouthInterval = setInterval(() => {
+  const mouthConfig = config.animations.mouth;
+  const intervalTime = mouthConfig.intervalMin + Math.random() * (mouthConfig.intervalMax - mouthConfig.intervalMin);
+  
+  mouthInterval = setTimeout(() => {
     if (!isMouthOpen && mouthLayer) {
       isMouthOpen = true;
       
@@ -119,19 +138,23 @@ function startMouthAnimation() {
       mouthLayer.style.transform = `${translateValue} scaleY(2.5) scaleX(1.1)`;
       
       // Return to normal after mouth open duration
+      const duration = mouthConfig.durationMin + Math.random() * (mouthConfig.durationMax - mouthConfig.durationMin);
       setTimeout(() => {
         mouthLayer.style.transform = translateValue;
         isMouthOpen = false;
-      }, 200 + Math.random() * 300); // Mouth open for 200-500ms
+        startMouthAnimation(); // Schedule next mouth movement
+      }, duration);
+    } else {
+      startMouthAnimation(); // Try again if conditions not met
     }
-  }, 4000 + Math.random() * 3000); // Random mouth movement every 4-7 seconds
+  }, intervalTime);
 }
 
 // Control handlers
 closeBtn.addEventListener('click', () => {
-  // Clean up intervals before closing
-  if (blinkInterval) clearInterval(blinkInterval);
-  if (mouthInterval) clearInterval(mouthInterval);
+  // Clean up intervals/timeouts before closing
+  if (blinkInterval) clearTimeout(blinkInterval);
+  if (mouthInterval) clearTimeout(mouthInterval);
   remote.getCurrentWindow().close();
 });
 

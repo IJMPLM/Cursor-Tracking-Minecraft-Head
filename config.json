@@ -1,0 +1,26 @@
+{
+  "assets": {
+    "eyes": "assets/Eyes1.png",
+    "mouth": "assets/Mouth1.png",
+    "face": "assets/Face1.png"
+  },
+  "animations": {
+    "blink": {
+      "intervalMin": 5000,
+      "intervalMax": 9000,
+      "duration": 150
+    },
+    "mouth": {
+      "intervalMin": 500,
+      "intervalMax": 2000,
+      "durationMin": 200,
+      "durationMax": 500
+    }
+  },
+  "tracking": {
+    "maxHeadRotation": 100,
+    "maxEyeTranslation": 2,
+    "rotationDistance": 200,
+    "translationDistance": 2
+  }
+}
