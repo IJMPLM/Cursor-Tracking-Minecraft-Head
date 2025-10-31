@@ -1,25 +1,25 @@
 {
   "assets": {
-    "eyes": "assets/Eyes2.png",
-    "mouth": "assets/Mouth2.png",
-    "face": "assets/Face2.png"
+    "eyes": "assets/Eyes1.png",
+    "mouth": "assets/Mouth1.png",
+    "face": "assets/Face1.png"
   },
   "animations": {
     "blink": {
       "intervalMin": 5000,
       "intervalMax": 9000,
       "duration": 150,
-      "scaleY": 0.5,
-      "translateY": -1
+      "scaleY": -0.1,
+      "translateY": 3
     },
     "mouth": {
       "intervalMin": 100,
       "intervalMax": 1000,
       "durationMin": 200,
       "durationMax": 500,
-      "scaleY": 2,
-      "scaleX": 0.4,
-      "translateY": 0.5
+      "scaleY": 3,
+      "scaleX": 0.6,
+      "translateY": 3
     }
   },
   "tracking": {
