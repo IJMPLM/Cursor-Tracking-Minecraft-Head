@@ -1,0 +1,31 @@
+{
+  "assets": {
+    "eyes": "assets/Eyes3.png",
+    "mouth": "assets/Mouth3.png",
+    "face": "assets/Face3.png"
+  },
+  "animations": {
+    "blink": {
+      "intervalMin": 5000,
+      "intervalMax": 9000,
+      "duration": 75,
+      "scaleY": 0.5,
+      "translateY": -1
+    },
+    "mouth": {
+      "intervalMin": 100,
+      "intervalMax": 1000,
+      "durationMin": 200,
+      "durationMax": 500,
+      "scaleY": 2,
+      "scaleX": 0.4,
+      "translateY": -3
+    }
+  },
+  "tracking": {
+    "maxHeadRotation": 100,
+    "maxEyeTranslation": 2,
+    "rotationDistance": 200,
+    "translationDistance": 2
+  }
+}
